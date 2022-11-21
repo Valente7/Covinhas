@@ -1,0 +1,29 @@
+import pandas as pd
+import numpy as np
+
+year = 1997
+
+def getio(year):
+    path = r'C:\Users\valen\Downloads\publicationtablesbb22.xlsx'
+#53 ate ao 62 avaliacao leitura
+    # Input output table
+    df = pd.read_excel(path,
+                       sheet_name=(year),
+                       usecols="C:L",
+                       header=None,
+                       skiprows=52,
+                       nrows=10)
+    z = np.array(df,
+                 dtype=float)  # £ million
+    # Output per sector
+    dfx = pd.read_excel(path,
+                        sheet_name=(year),
+                        usecols="C:L",
+                        header=None,
+                        skiprows=75,
+                        nrows=1)
+    x = np.array(dfx, dtype=float)[0]  # £ million
+    return [z, x]
+
+
+print(getio(year))

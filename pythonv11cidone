@@ -1,0 +1,193 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+#Função Identidade
+I=[ [1,0,0,0,0,0,0,0,0,0],
+    [0,1,0,0,0,0,0,0,0,0],
+    [0,0,1,0,0,0,0,0,0,0],
+    [0,0,0,1,0,0,0,0,0,0],
+    [0,0,0,0,1,0,0,0,0,0],
+    [0,0,0,0,0,1,0,0,0,0],
+    [0,0,0,0,0,0,1,0,0,0],
+    [0,0,0,0,0,0,0,1,0,0],
+    [0,0,0,0,0,0,0,0,1,0],
+    [0,0,0,0,0,0,0,0,0,1] ]
+
+#ano inicial
+year=1997
+
+"""
+i=2
+j=2
+K=[[1,9,2],[3,4,4],[8,9,5]]
+def k(i,j):
+    return K[i][j]
+print(k(i,j))
+"""
+'''
+K=[[1,9,2],[3,4,4],[8,9,5]]
+K=np.linalg.inv(K)
+print(K)
+'''
+
+#getio(year)
+def getio (year):
+ path = r"C:\Users\valen\Downloads\bb22a10summarytables.xlsx"
+ # Input output table
+ df = pd.read_excel(path,
+ sheet_name = str(year),
+ usecols = "C:L",
+ header = None,
+ skiprows = 52,
+ nrows = 10)
+ z = np.array(df,dtype = float) # £ million
+
+ # Output per sector
+ dfx = pd.read_excel(path,
+ sheet_name = str(year),
+ usecols = "C:L",
+ header = None,
+ skiprows = 75,
+ nrows = 1)
+ x = np.array(dfx, dtype = float)[0] # £ million
+ return [z, x]
+
+#a)DONE
+
+#i. a função coef(year) que devolve a matriz de coeficientes técnicos de um ano
+def coef(year):
+ z, x = getio(year)
+ #inicialização da variável i integer
+ i: int=0
+ #Criação da matriz dos coeficientes técnicos do ano X
+ c=[None]*10
+ #Preenchimento da matriz dos coeficientes técnicos do ano X
+ for index in z:
+     #coeficiente técnico = aij=xij/xj
+     #Divide-se portanto cada input de cada setor pelo output do setor Agricultura até Outros Serviços, correspondendo à matriz dos coeficientes técnicos do ano X
+     c[i]=(z[i]/x[i])
+     i += 1
+ return c
+
+#ii. a lista coefs com as matrizes dos coeficientes técnicos de 1997 a 2020
+coefs=[None]*2021
+
+#A=Matriz dos coeficientes técnicos do ano 1997
+A = coef(year)
+coefs[year] = A
+#print(A)
+#print(coef[year])
+
+#loop 1997-2020 para preencher a lista das matrizes de coeficientes técnicos de 1997 a 2020
+
+for i in range(1997,2020):
+ year+=1
+ coef(year)
+ coefs[year] = coef(year)
+ #print(coefs[year])
+ #print("\n")
+ if year==2020:
+  break
+
+"""
+xaxis = range(1997, 2021)
+yaxis = [coefs[i][1, 0] for i in range(2021-1997)]
+plt.plot(xaxis, yaxis)
+"""
+
+#b)DONE
+
+#a=Matriz de coeficientes do ano a
+year=input("Ano:")
+a=coefs[int(year)]
+
+#i. a função leon(a) que devolve um array com a matriz inversa de Leontief, dada uma matriz de coeficientes técnicos, a.
+def leon(a):
+ #print(a)
+ #print("\n")
+ a=(np.array(I)-np.array(a))
+ #print(a)
+ #print("\n")
+ #a=Inverso de (I-a), ou seja, matriz inversa de Leontief
+ a=np.linalg.inv(a)
+ #print(a)
+ #print("\n")
+ return a
+
+leon(a)
+#print(leon(a))
+
+#ii. a função highest_impact(a) que devolve o bem, ou setor, cujo impacto de uma alteração unitária de procura resulta no maior impacto na produção da economia.
+#X=(I−A)^-1 * D
+def highest_impact(a):
+    a=(leon(a))
+    #print(a)
+    i=0
+    #Max
+    Max = 0
+    #q
+    q = 0
+    #descobrir o maior impacto
+    for index in a:
+        # demand vector
+        d = np.array([[0.0]]*10)
+        #bem unitário ......
+        d[i]=1
+        #print(d)
+        X=a.dot(d)
+        X=X[0] + X[1] + X[2] + X[3] + X[4] + X[5] + X[6] + X[7] + X[8] + X[9]
+        #print(X[0])
+        if X[0]>Max:
+            q +=1
+        Max= max(X[0],Max)
+        #print(Max)
+        #print("\n")
+        i +=1
+
+    return "Highest Impact = Sector\t" + str(q)
+
+print(highest_impact(a))
+
+#c)DOING
+
+#i. as funções minaij(mats, i, j) e maxaij(mats, i, j) que, dada uma lista
+#de matrizes de coeficientes técnicos (arrays) mats e posições i, j,
+#devolvem, respetivamente, o mínimo e o máximo valor que o coeficiente
+#técnico 𝑎!" toma nas matrizes em mats.
+
+mats=coefs
+i=int(input("Linha:"))-1
+j=int(input("Coluna:"))-1
+
+def minaij(mats,i,j):
+    year = 1997
+    # inicializa-se min=1 pois 1 é o máximo valor possivel para um coeficiente técnico
+    Min = 1.0
+    #print(coefs[year][i][j])
+    for l in range(1997,2020):
+        Min=min(coefs[year][i][j],Min)
+        year+=1
+        if year >= 2021:
+            break
+    return Min
+
+def maxaij(mats,i,j):
+    year = 1997
+    # inicializa-se min=1 pois 1 é o máximo valor possivel para um coeficiente técnico
+    Max = 0
+    #print(coefs[year][i][j])
+    for l in range(1997,2020):
+        Max=max(coefs[year][i][j],Max)
+        year+=1
+        if year >= 2021:
+            break
+    return Max
+
+print("Mínimo:")
+print(minaij(mats,i,j))
+print("Máximo:")
+print(maxaij(mats,i,j))
+
+#ii. a função simA(mats) que, dada uma lista de matrizes de coeficientes técnicos
+#(arrays) mats, devolve um array com uma matriz simulação.
